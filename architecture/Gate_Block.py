@@ -1,13 +1,13 @@
 #!/usr/bin/env python
 # -*- encoding: utf-8 -*-
 '''
-@File    :   Gate Block
-@Time    :   2022/10/13 10:35:49
-@Author  :   Xujun Zhang
-@Version :   1.0
-@Contact :   
-@License :   
-@Desc    :   None
+@文件    :   Gate Block
+@时间    :   2022/10/13 10:35:49
+@作者    :   Xujun Zhang
+@版本    :   1.0
+@联系方式 :   
+@许可证   :   
+@描述    :   无
 '''
 import torch
 from torch import nn
@@ -16,7 +16,7 @@ from torch_geometric.utils import softmax
 from torch_scatter import scatter
 from torch_geometric.nn import GraphNorm
 
-# here put the import lib
+# 这里放入导入库
 class Gate_Block(nn.Module):
     def __init__(self, dim_tmp, drop_rate=0.15):
         super().__init__()

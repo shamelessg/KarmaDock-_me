@@ -40,19 +40,19 @@ class PDBBindGraphDataset(Dataset):
                  verbose=False):
         '''
 
-        :param src_dir: path for saving pocket file and ligand file
-        :param pdb_ids: pdb id of protein file
-        :param dst_dir: path for saving graph file
-        :param pki_labels: pki/pkd/ic50 of protein-ligand complexes
-        :param pocket_centers: the center of pocket (the center of the crystal ligand), (Num of complex, 3) np.array
-        :param dataset_type: in ['train', 'valid', 'test']
-        :param n_job: if n_job == 1: use for-loop;else: use multiprocessing
-        :param on_the_fly: whether to get graph from a totoal graph list or a single graph file
+        :param src_dir: 保存口袋文件和配体文件的路径
+        :param pdb_ids: 蛋白质文件的pdb id
+        :param dst_dir: 保存图文件的路径
+        :param pki_labels: 蛋白质-配体复合物的pki/pkd/ic50
+        :param pocket_centers: 口袋的中心（晶体配体的中心），(复合物数量, 3) np.array
+        :param dataset_type: 取值 ['train', 'valid', 'test']
+        :param n_job: 如果 n_job == 1: 使用for循环;否则: 使用多进程
+        :param on_the_fly: 是否从整体图列表或单个图文件获取图
         _______________________________________________________________________________________________________
-        |  mode  |  generate single graph file  |  generate integrated graph file  |  load to memory at once  |
-        |  False |          No                  |              Yes                 |            Yes           |
-        |  True  |          Yes                 |              No                  |            No            |
-        |  Fake  |          Yes                 |              No                  |            Yes           |
+        |  模式   |  生成单个图文件  |  生成集成图文件  |  一次性加载到内存  |
+        |  False |          否       |        是        |         是        |
+        |  True  |          是       |        否        |         否        |
+        |  Fake  |          是       |        否        |         是        |
         _______________________________________________________________________________________________________
         '''
         self.src_dir = src_dir
@@ -191,6 +191,11 @@ class PDBBindGraphDataset(Dataset):
 class MultiComplexGraphDataset_Fly(Dataset):
 
     def __init__(self, complex_path, protein_ligand_names, reload_g=False):
+        '''
+        :param complex_path: 复合物路径
+        :param protein_ligand_names: 蛋白质-配体名称列表
+        :param reload_g: 是否重新加载图
+        '''
         self.complex_path = complex_path
         self.protein_ligand_names = protein_ligand_names
         self.protein2data_dict = {}

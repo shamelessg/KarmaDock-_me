@@ -1,16 +1,16 @@
 #!/usr/bin/env python
 # -*- encoding: utf-8 -*-
 '''
-@File    :   MDN Block
-@Time    :   2022/09/10 10:34:28
-@Author  :   copied from DeepDock
-@Version :   1.0
-@Contact :   
-@License :   
-@Desc    :   None
+@文件    :   MDN Block
+@时间    :   2022/09/10 10:34:28
+@作者    :   从DeepDock复制
+@版本    :   1.0
+@联系方式 :   
+@许可证   :   
+@描述    :   无
 '''
 
-# here put the import lib
+# 这里放入导入库
 import numpy as np
 import torch
 import torch.nn as nn
@@ -43,7 +43,7 @@ class MDN_Block(nn.Module):
         self.B = B
         self.N_l = N_l
         self.N_t = N_t
-        # Combine and mask
+        # 组合和掩码
         h_l_x = h_l_x.unsqueeze(-2)
         h_l_x = h_l_x.repeat(1, 1, N_t, 1) # [B, N_l, N_t, C_out]
 
@@ -55,11 +55,11 @@ class MDN_Block(nn.Module):
         self.C = C = C[C_mask]
         C = self.MLP(C)
 
-        # Get batch indexes for ligand-target combined features
+        # 获取配体-目标组合特征的批次索引
         C_batch = torch.tensor(range(B)).unsqueeze(-1).unsqueeze(-1).to(lig_s.device)
         C_batch = C_batch.repeat(1, N_l, N_t)[C_mask]
         
-        # Outputs
+        # 输出
         pi = F.softmax(self.z_pi(C), -1)
         sigma = F.elu(self.z_sigma(C))+1.1
         mu = F.elu(self.z_mu(C))+1

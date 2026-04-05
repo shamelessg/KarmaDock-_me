@@ -20,15 +20,15 @@ def binarize(x):
 
 def get_higher_order_adj_matrix(adj, order):
     """
-    Args:
+    参数:
         adj:        (N, N)
         type_mat:   (N, N)
-    Returns:
-        Following attributes will be updated:
+    返回:
+        以下属性将被更新:
             - edge_index
             - edge_type
-        Following attributes will be added to the data object:
-            - bond_edge_index:  Original edge_index.
+        以下属性将被添加到数据对象:
+            - bond_edge_index:  原始的 edge_index.
     """
     adj_mats = [torch.eye(adj.size(0), dtype=torch.long, device=adj.device), \
                 binarize(adj + torch.eye(adj.size(0), dtype=torch.long, device=adj.device))]
@@ -103,26 +103,26 @@ def onehot(x, vocab, allow_unknown=False):
 
 
 def atom_default(atom):
-    """Default atom feature.
+    """默认原子特征。
 
-    Features:
-        GetSymbol(): one-hot embedding for the atomic symbol dim=18
+    特征:
+        GetSymbol(): 原子符号的one-hot嵌入 dim=18
         
-        GetChiralTag(): one-hot embedding for atomic chiral tag dim=5
+        GetChiralTag(): 原子手性标签的one-hot嵌入 dim=5
         
-        GetTotalDegree(): one-hot embedding for the degree of the atom in the molecule including Hs dim=5
+        GetTotalDegree(): 分子中原子的度数（包括Hs）的one-hot嵌入 dim=5
         
-        GetFormalCharge(): one-hot embedding for the number of formal charges in the molecule
+        GetFormalCharge(): 分子中形式电荷数的one-hot嵌入
         
-        GetTotalNumHs(): one-hot embedding for the total number of Hs (explicit and implicit) on the atom 
+        GetTotalNumHs(): 原子上Hs的总数（显式和隐式）的one-hot嵌入 
         
-        GetNumRadicalElectrons(): one-hot embedding for the number of radical electrons on the atom
+        GetNumRadicalElectrons(): 原子上自由基电子数的one-hot嵌入
         
-        GetHybridization(): one-hot embedding for the atom's hybridization
+        GetHybridization(): 原子杂化的one-hot嵌入
         
-        GetIsAromatic(): whether the atom is aromatic
+        GetIsAromatic(): 原子是否为芳香性
         
-        IsInRing(): whether the atom is in a ring
+        IsInRing(): 原子是否在环中
         18 + 5 + 8 + 12 + 8 + 9 + 10 + 9 + 3 + 4 
     """
     return onehot(atom.GetSymbol(), atom_vocab, allow_unknown=True) + \
@@ -138,20 +138,20 @@ def atom_default(atom):
 
 
 def atom_center_identification(atom):
-    """Reaction center identification atom feature.
+    """反应中心识别原子特征。
 
-    Features:
-        GetSymbol(): one-hot embedding for the atomic symbol
+    特征:
+        GetSymbol(): 原子符号的one-hot嵌入
         
-        GetTotalNumHs(): one-hot embedding for the total number of Hs (explicit and implicit) on the atom 
+        GetTotalNumHs(): 原子上Hs的总数（显式和隐式）的one-hot嵌入 
         
-        GetTotalDegree(): one-hot embedding for the degree of the atom in the molecule including Hs
+        GetTotalDegree(): 分子中原子的度数（包括Hs）的one-hot嵌入
         
-        GetTotalValence(): one-hot embedding for the total valence (explicit + implicit) of the atom
+        GetTotalValence(): 原子的总价态（显式 + 隐式）的one-hot嵌入
         
-        GetIsAromatic(): whether the atom is aromatic
+        GetIsAromatic(): 原子是否为芳香性
         
-        IsInRing(): whether the atom is in a ring
+        IsInRing(): 原子是否在环中
     """
     return onehot(atom.GetSymbol(), atom_vocab, allow_unknown=True) + \
            onehot(atom.GetTotalNumHs(), num_hs_vocab) + \
@@ -162,20 +162,20 @@ def atom_center_identification(atom):
 
 
 def atom_synthon_completion(atom):
-    """Synthon completion atom feature.
+    """合成子完成原子特征。
 
-    Features:
-        GetSymbol(): one-hot embedding for the atomic symbol
+    特征:
+        GetSymbol(): 原子符号的one-hot嵌入
 
-        GetTotalNumHs(): one-hot embedding for the total number of Hs (explicit and implicit) on the atom 
+        GetTotalNumHs(): 原子上Hs的总数（显式和隐式）的one-hot嵌入 
         
-        GetTotalDegree(): one-hot embedding for the degree of the atom in the molecule including Hs
+        GetTotalDegree(): 分子中原子的度数（包括Hs）的one-hot嵌入
         
-        IsInRing(): whether the atom is in a ring
+        IsInRing(): 原子是否在环中
         
-        IsInRingSize(3, 4, 5, 6): whether the atom is in a ring of a particular size
+        IsInRingSize(3, 4, 5, 6): 原子是否在特定大小的环中
         
-        IsInRing() and not IsInRingSize(3, 4, 5, 6): whether the atom is in a ring and not in a ring of 3, 4, 5, 6
+        IsInRing() and not IsInRingSize(3, 4, 5, 6): 原子是否在环中且不在3, 4, 5, 6大小的环中
     """
     return onehot(atom.GetSymbol(), atom_vocab, allow_unknown=True) + \
            onehot(atom.GetTotalNumHs(), num_hs_vocab) + \
@@ -188,28 +188,28 @@ def atom_synthon_completion(atom):
 
 
 def atom_symbol(atom):
-    """Symbol atom feature.
+    """符号原子特征。
 
-    Features:
-        GetSymbol(): one-hot embedding for the atomic symbol
+    特征:
+        GetSymbol(): 原子符号的one-hot嵌入
     """
     return onehot(atom.GetSymbol(), atom_vocab, allow_unknown=True)
 
 
 
 def atom_explicit_property_prediction(atom):
-    """Explicit property prediction atom feature.
+    """显式性质预测原子特征。
 
-    Features:
-        GetSymbol(): one-hot embedding for the atomic symbol
+    特征:
+        GetSymbol(): 原子符号的one-hot嵌入
 
-        GetDegree(): one-hot embedding for the degree of the atom in the molecule
+        GetDegree(): 分子中原子的度数的one-hot嵌入
 
-        GetTotalValence(): one-hot embedding for the total valence (explicit + implicit) of the atom
+        GetTotalValence(): 原子的总价态（显式 + 隐式）的one-hot嵌入
         
-        GetFormalCharge(): one-hot embedding for the number of formal charges in the molecule
+        GetFormalCharge(): 分子中形式电荷数的one-hot嵌入
         
-        GetIsAromatic(): whether the atom is aromatic
+        GetIsAromatic(): 原子是否为芳香性
     """
     return onehot(atom.GetSymbol(), atom_vocab, allow_unknown=True) + \
            onehot(atom.GetDegree(), degree_vocab, allow_unknown=True) + \
@@ -220,20 +220,20 @@ def atom_explicit_property_prediction(atom):
 
 
 def atom_property_prediction(atom):
-    """Property prediction atom feature.
+    """性质预测原子特征。
 
-    Features:
-        GetSymbol(): one-hot embedding for the atomic symbol
+    特征:
+        GetSymbol(): 原子符号的one-hot嵌入
         
-        GetDegree(): one-hot embedding for the degree of the atom in the molecule
+        GetDegree(): 分子中原子的度数的one-hot嵌入
         
-        GetTotalNumHs(): one-hot embedding for the total number of Hs (explicit and implicit) on the atom 
+        GetTotalNumHs(): 原子上Hs的总数（显式和隐式）的one-hot嵌入 
         
-        GetTotalValence(): one-hot embedding for the total valence (explicit + implicit) of the atom
+        GetTotalValence(): 原子的总价态（显式 + 隐式）的one-hot嵌入
         
-        GetFormalCharge(): one-hot embedding for the number of formal charges in the molecule
+        GetFormalCharge(): 分子中形式电荷数的one-hot嵌入
         
-        GetIsAromatic(): whether the atom is aromatic
+        GetIsAromatic(): 原子是否为芳香性
     """
     return onehot(atom.GetSymbol(), atom_vocab, allow_unknown=True) + \
            onehot(atom.GetDegree(), degree_vocab, allow_unknown=True) + \
@@ -246,10 +246,10 @@ def atom_property_prediction(atom):
 
 def atom_position(atom):
     """
-    Atom position in the molecular conformation.
-    Return 3D position if available, otherwise 2D position is returned.
+    分子构象中的原子位置。
+    如果可用，返回3D位置，否则返回2D位置。
 
-    Note it takes much time to compute the conformation for large molecules.
+    注意，计算大分子的构象需要很多时间。
     """
     mol = atom.GetOwningMol()
     if mol.GetNumConformers() == 0:
@@ -261,12 +261,12 @@ def atom_position(atom):
 
 
 def atom_pretrain(atom):
-    """Atom feature for pretraining.
+    """预训练的原子特征。
 
-    Features:
-        GetSymbol(): one-hot embedding for the atomic symbol
+    特征:
+        GetSymbol(): 原子符号的one-hot嵌入
         
-        GetChiralTag(): one-hot embedding for atomic chiral tag
+        GetChiralTag(): 原子手性标签的one-hot嵌入
     """
     return onehot(atom.GetSymbol(), atom_vocab, allow_unknown=True) + \
            onehot(atom.GetChiralTag(), chiral_tag_vocab)
@@ -274,11 +274,11 @@ def atom_pretrain(atom):
 
 
 def atom_residue_symbol(atom):
-    """Residue symbol as atom feature. Only support atoms in a protein.
+    """作为原子特征的残基符号。仅支持蛋白质中的原子。
 
-    Features:
-        GetSymbol(): one-hot embedding for the atomic symbol
-        GetResidueName(): one-hot embedding for the residue symbol
+    特征:
+        GetSymbol(): 原子符号的one-hot嵌入
+        GetResidueName(): 残基符号的one-hot嵌入
     """
     residue = atom.GetPDBResidueInfo()
     return onehot(atom.GetSymbol(), atom_vocab, allow_unknown=True) + \
@@ -286,16 +286,16 @@ def atom_residue_symbol(atom):
 
 
 def bond_default(bond):
-    """Default bond feature.
+    """默认键特征。
 
-    Features:
-        GetBondType(): one-hot embedding for the type of the bond
+    特征:
+        GetBondType(): 键类型的one-hot嵌入
         
-        GetBondDir(): one-hot embedding for the direction of the bond
+        GetBondDir(): 键方向的one-hot嵌入
         
-        GetStereo(): one-hot embedding for the stereo configuration of the bond
+        GetStereo(): 键的立体构型的one-hot嵌入
         
-        GetIsConjugated(): whether the bond is considered to be conjugated
+        GetIsConjugated(): 键是否被认为是共轭的
     """
     return onehot(bond.GetBondType(), bond_type_vocab, allow_unknown=True) + \
            onehot(bond.GetBondDir(), bond_dir_vocab) + \
@@ -306,9 +306,9 @@ def bond_default(bond):
 
 def bond_length(bond):
     """
-    Bond length in the molecular conformation.
+    分子构象中的键长。
 
-    Note it takes much time to compute the conformation for large molecules.
+    注意，计算大分子的构象需要很多时间。
     """
     mol = bond.GetOwningMol()
     if mol.GetNumConformers() == 0:
@@ -321,14 +321,14 @@ def bond_length(bond):
 
 
 def bond_property_prediction(bond):
-    """Property prediction bond feature.
+    """性质预测键特征。
 
-    Features:
-        GetBondType(): one-hot embedding for the type of the bond
+    特征:
+        GetBondType(): 键类型的one-hot嵌入
         
-        GetIsConjugated(): whether the bond is considered to be conjugated
+        GetIsConjugated(): 键是否被认为是共轭的
         
-        IsInRing(): whether the bond is in a ring
+        IsInRing(): 键是否在环中
     """
     return onehot(bond.GetBondType(), bond_type_vocab) + \
            [int(bond.GetIsConjugated()), bond.IsInRing()]
@@ -336,12 +336,12 @@ def bond_property_prediction(bond):
 
 
 def bond_pretrain(bond):
-    """Bond feature for pretraining.
+    """预训练的键特征。
 
-    Features:
-        GetBondType(): one-hot embedding for the type of the bond
+    特征:
+        GetBondType(): 键类型的one-hot嵌入
         
-        GetBondDir(): one-hot embedding for the direction of the bond
+        GetBondDir(): 键方向的one-hot嵌入
     """
     return onehot(bond.GetBondType(), bond_type_vocab) + \
            onehot(bond.GetBondDir(), bond_dir_vocab)
@@ -349,30 +349,30 @@ def bond_pretrain(bond):
 
 
 def residue_symbol(residue):
-    """Symbol residue feature.
+    """符号残基特征。
 
-    Features:
-        GetResidueName(): one-hot embedding for the residue symbol
+    特征:
+        GetResidueName(): 残基符号的one-hot嵌入
     """
     return onehot(residue.GetResidueName(), residue_vocab, allow_unknown=True)
 
 
 
 def residue_default(residue):
-    """Default residue feature.
+    """默认残基特征。
 
-    Features:
-        GetResidueName(): one-hot embedding for the residue symbol
+    特征:
+        GetResidueName(): 残基符号的one-hot嵌入
     """
     return residue_symbol(residue)
 
 
 
 def ExtendedConnectivityFingerprint(mol, radius=2, length=1024):
-    """Extended Connectivity Fingerprint molecule feature.
+    """扩展连接指纹分子特征。
 
-    Features:
-        GetMorganFingerprintAsBitVect(): a Morgan fingerprint for a molecule as a bit vector
+    特征:
+        GetMorganFingerprintAsBitVect(): 分子的Morgan指纹作为位向量
     """
     ecfp = AllChem.GetMorganFingerprintAsBitVect(mol, radius, length)
     return list(ecfp)
@@ -381,7 +381,7 @@ def ExtendedConnectivityFingerprint(mol, radius=2, length=1024):
 
 
 def molecule_default(mol):
-    """Default molecule feature."""
+    """默认分子特征。"""
     return ExtendedConnectivityFingerprint(mol)
 
 

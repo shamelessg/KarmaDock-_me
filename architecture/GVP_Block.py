@@ -1,13 +1,13 @@
 #!usr/bin/env python3
 # -*- coding:utf-8 -*-
 '''
-@File    :   GVP Block
-@Time    :   2022/10/13 10:35:49
-@Author  :   Xujun Zhang
-@Version :   1.0
-@Contact :   
-@License :   
-@Desc    :   None
+@文件    :   GVP Block
+@时间    :   2022/10/13 10:35:49
+@作者    :   Xujun Zhang
+@版本    :   1.0
+@联系方式 :   
+@许可证   :   
+@描述    :   无
 '''
 
 import functools
@@ -20,28 +20,21 @@ from torch_scatter import scatter_add
 
 class GVP_embedding(nn.Module):
     '''
-    Modified based on https://github.com/drorlab/gvp-pytorch/blob/main/gvp/models.py
-    GVP-GNN for Model Quality Assessment as described in manuscript.
+    基于https://github.com/drorlab/gvp-pytorch/blob/main/gvp/models.py修改
+    如论文中所述的用于模型质量评估的GVP-GNN。
 
-    Takes in protein structure graphs of type `torch_geometric.data.Data`
-    or `torch_geometric.data.Batch` and returns a scalar score for
-    each graph in the batch in a `torch.Tensor` of shape [n_nodes]
+    接收`torch_geometric.data.Data`或`torch_geometric.data.Batch`类型的蛋白质结构图，
+    并返回批次中每个图的标量分数，形状为[n_nodes]的`torch.Tensor`
 
-    Should be used with `gvp.data.ProteinGraphDataset`, or with generators
-    of `torch_geometric.data.Batch` objects with the same attributes.
+    应与`gvp.data.ProteinGraphDataset`一起使用，或与具有相同属性的`torch_geometric.data.Batch`对象生成器一起使用。
 
-    :param node_in_dim: node dimensions in input graph, should be
-                        (6, 3) if using original features
-    :param node_h_dim: node dimensions to use in GVP-GNN layers
-    :param node_in_dim: edge dimensions in input graph, should be
-                        (32, 1) if using original features
-    :param edge_h_dim: edge dimensions to embed to before use
-                       in GVP-GNN layers
-    :seq_in: if `True`, sequences will also be passed in with
-             the forward pass; otherwise, sequence information
-             is assumed to be part of input node embeddings
-    :param num_layers: number of GVP-GNN layers
-    :param drop_rate: rate to use in all dropout layers
+    :param node_in_dim: 输入图中的节点维度，如果使用原始特征应为(6, 3)
+    :param node_h_dim: GVP-GNN层中使用的节点维度
+    :param node_in_dim: 输入图中的边维度，如果使用原始特征应为(32, 1)
+    :param edge_h_dim: 在GVP-GNN层中使用前要嵌入的边维度
+    :seq_in: 如果为`True`，序列也将在前向传递中传入；否则，序列信息被假定为输入节点嵌入的一部分
+    :param num_layers: GVP-GNN层的数量
+    :param drop_rate: 所有 dropout 层中使用的速率
     '''
 
     def __init__(self, node_in_dim, node_h_dim,
@@ -74,11 +67,11 @@ class GVP_embedding(nn.Module):
 
     def forward(self, h_V, edge_index, h_E, seq):
         '''
-        :param h_V: tuple (s, V) of node embeddings
-        :param edge_index: `torch.Tensor` of shape [2, num_edges]
-        :param h_E: tuple (s, V) of edge embeddings
-        :param seq: if not `None`, int `torch.Tensor` of shape [num_nodes]
-                    to be embedded and appended to `h_V`
+        :param h_V: 节点嵌入的元组 (s, V)
+        :param edge_index: 形状为 [2, num_edges] 的 `torch.Tensor`
+        :param h_E: 边嵌入的元组 (s, V)
+        :param seq: 如果不为 `None`，则为形状为 [num_nodes] 的 int `torch.Tensor`
+                    将被嵌入并附加到 `h_V`
         '''
         seq = self.W_s(seq)
         h_V = (torch.cat([h_V[0], seq], dim=-1), h_V[1])
@@ -93,19 +86,17 @@ class GVP_embedding(nn.Module):
 
 def tuple_sum(*args):
     '''
-    Sums any number of tuples (s, V) elementwise.
+    按元素对任意数量的元组 (s, V) 求和。
     '''
     return tuple(map(sum, zip(*args)))
 
 
 def tuple_cat(*args, dim=-1):
     '''
-    Concatenates any number of tuples (s, V) elementwise.
+    按元素连接任意数量的元组 (s, V)。
 
-    :param dim: dimension along which to concatenate when viewed
-                as the `dim` index for the scalar-channel tensors.
-                This means that `dim=-1` will be applied as
-                `dim=-2` for the vector-channel tensors.
+    :param dim: 当被视为标量通道张量的 `dim` 索引时，要沿其连接的维度。
+                这意味着 `dim=-1` 将被应用为向量通道张量的 `dim=-2`。
     '''
     dim %= len(args[0][0].shape)
     s_args, v_args = list(zip(*args))
@@ -114,21 +105,21 @@ def tuple_cat(*args, dim=-1):
 
 def tuple_index(x, idx):
     '''
-    Indexes into a tuple (s, V) along the first dimension.
+    沿第一维度索引到元组 (s, V) 中。
 
-    :param idx: any object which can be used to index into a `torch.Tensor`
+    :param idx: 任何可以用于索引 `torch.Tensor` 的对象
     '''
     return x[0][idx], x[1][idx]
 
 
 def randn(n, dims, device="cpu"):
     '''
-    Returns random tuples (s, V) drawn elementwise from a normal distribution.
+    返回从正态分布中按元素绘制的随机元组 (s, V)。
 
-    :param n: number of data points
-    :param dims: tuple of dimensions (n_scalar, n_vector)
+    :param n: 数据点数量
+    :param dims: 维度元组 (n_scalar, n_vector)
 
-    :return: (s, V) with s.shape = (n, n_scalar) and
+    :return: (s, V)，其中 s.shape = (n, n_scalar) 且
              V.shape = (n, n_vector, 3)
     '''
     return torch.randn(n, dims[0], device=device), \
@@ -137,9 +128,9 @@ def randn(n, dims, device="cpu"):
 
 def _norm_no_nan(x, axis=-1, keepdims=False, eps=1e-8, sqrt=True):
     '''
-    L2 norm of tensor clamped above a minimum value `eps`.
+    张量的L2范数，钳制在最小值 `eps` 以上。
 
-    :param sqrt: if `False`, returns the square of the L2 norm
+    :param sqrt: 如果为 `False`，返回L2范数的平方
     '''
     out = torch.clamp(torch.sum(torch.square(x), axis, keepdims), min=eps)
     return torch.sqrt(out) if sqrt else out
@@ -147,12 +138,11 @@ def _norm_no_nan(x, axis=-1, keepdims=False, eps=1e-8, sqrt=True):
 
 def _split(x, nv):
     '''
-    Splits a merged representation of (s, V) back into a tuple.
-    Should be used only with `_merge(s, V)` and only if the tuple
-    representation cannot be used.
+    将合并的 (s, V) 表示拆分为元组。
+    应仅与 `_merge(s, V)` 一起使用，且仅在无法使用元组表示时使用。
 
-    :param x: the `torch.Tensor` returned from `_merge`
-    :param nv: the number of vector channels in the input to `_merge`
+    :param x: 从 `_merge` 返回的 `torch.Tensor`
+    :param nv: `_merge` 输入中的向量通道数
     '''
     v = torch.reshape(x[..., -3 * nv:], x.shape[:-1] + (nv, 3))
     s = x[..., :-3 * nv]
@@ -161,10 +151,9 @@ def _split(x, nv):
 
 def _merge(s, v):
     '''
-    Merges a tuple (s, V) into a single `torch.Tensor`, where the
-    vector channels are flattened and appended to the scalar channels.
-    Should be used only if the tuple representation cannot be used.
-    Use `_split(x, nv)` to reverse.
+    将元组 (s, V) 合并为单个 `torch.Tensor`，其中向量通道被展平并附加到标量通道。
+    应仅在无法使用元组表示时使用。
+    使用 `_split(x, nv)` 来反转。
     '''
     v = torch.reshape(v, v.shape[:-2] + (3 * v.shape[-2],))
     return torch.cat([s, v], -1)
@@ -172,15 +161,14 @@ def _merge(s, v):
 
 class GVP(nn.Module):
     '''
-    Geometric Vector Perceptron. See manuscript and README.md.md
-    for more details.
+    几何向量感知器。有关更多详细信息，请参阅论文和README.md。
 
-    :param in_dims: tuple (n_scalar, n_vector)
-    :param out_dims: tuple (n_scalar, n_vector)
-    :param h_dim: intermediate number of vector channels, optional
-    :param activations: tuple of functions (scalar_act, vector_act)
-    :param vector_gate: whether to use vector gating.
-                        (vector_act will be used as sigma^+ in vector gating if `True`)
+    :param in_dims: 元组 (n_scalar, n_vector)
+    :param out_dims: 元组 (n_scalar, n_vector)
+    :param h_dim: 中间向量通道数，可选
+    :param activations: 函数元组 (scalar_act, vector_act)
+    :param vector_gate: 是否使用向量门控。
+                        如果为 `True`，vector_act 将用作向量门控中的 sigma^+
     '''
 
     def __init__(self, in_dims, out_dims, h_dim=None,
@@ -204,10 +192,10 @@ class GVP(nn.Module):
 
     def forward(self, x):
         '''
-        :param x: tuple (s, V) of `torch.Tensor`,
-                  or (if vectors_in is 0), a single `torch.Tensor`
-        :return: tuple (s, V) of `torch.Tensor`,
-                 or (if vectors_out is 0), a single `torch.Tensor`
+        :param x: `torch.Tensor` 的元组 (s, V)，
+                  或（如果 vectors_in 为 0），单个 `torch.Tensor`
+        :return: `torch.Tensor` 的元组 (s, V)，
+                 或（如果 vectors_out 为 0），单个 `torch.Tensor`
         '''
         if self.vi:
             s, v = x
@@ -240,8 +228,7 @@ class GVP(nn.Module):
 
 class _VDropout(nn.Module):
     '''
-    Vector channel dropout where the elements of each
-    vector channel are dropped together.
+    向量通道 dropout，其中每个向量通道的元素一起被丢弃。
     '''
 
     def __init__(self, drop_rate):
@@ -251,7 +238,7 @@ class _VDropout(nn.Module):
 
     def forward(self, x):
         '''
-        :param x: `torch.Tensor` corresponding to vector channels
+        :param x: 对应于向量通道的 `torch.Tensor`
         '''
         device = self.dummy_param.device
         if not self.training:
@@ -265,8 +252,8 @@ class _VDropout(nn.Module):
 
 class Dropout(nn.Module):
     '''
-    Combined dropout for tuples (s, V).
-    Takes tuples (s, V) as input and as output.
+    用于元组 (s, V) 的组合 dropout。
+    接收元组 (s, V) 作为输入和输出。
     '''
 
     def __init__(self, drop_rate):
@@ -276,9 +263,9 @@ class Dropout(nn.Module):
 
     def forward(self, x):
         '''
-        :param x: tuple (s, V) of `torch.Tensor`,
-                  or single `torch.Tensor`
-                  (will be assumed to be scalar channels)
+        :param x: `torch.Tensor` 的元组 (s, V)，
+                  或单个 `torch.Tensor`
+                  （将被假定为标量通道）
         '''
         if type(x) is torch.Tensor:
             return self.sdropout(x)
@@ -288,8 +275,8 @@ class Dropout(nn.Module):
 
 class LayerNorm(nn.Module):
     '''
-    Combined LayerNorm for tuples (s, V).
-    Takes tuples (s, V) as input and as output.
+    用于元组 (s, V) 的组合 LayerNorm。
+    接收元组 (s, V) 作为输入和输出。
     '''
 
     def __init__(self, dims):
@@ -299,9 +286,9 @@ class LayerNorm(nn.Module):
 
     def forward(self, x):
         '''
-        :param x: tuple (s, V) of `torch.Tensor`,
-                  or single `torch.Tensor`
-                  (will be assumed to be scalar channels)
+        :param x: `torch.Tensor` 的元组 (s, V)，
+                  或单个 `torch.Tensor`
+                  （将被假定为标量通道）
         '''
         if not self.v:
             return self.scalar_norm(x)
@@ -313,23 +300,22 @@ class LayerNorm(nn.Module):
 
 class GVPConv(MessagePassing):
     '''
-    Graph convolution / message passing with Geometric Vector Perceptrons.
-    Takes in a graph with node and edge embeddings,
-    and returns new node embeddings.
+    使用几何向量感知器的图卷积/消息传递。
+    接收带有节点和边嵌入的图，
+    并返回新的节点嵌入。
 
-    This does NOT do residual updates and pointwise feedforward layers
-    ---see `GVPConvLayer`.
+    这不执行残差更新和逐点前馈层
+    ---参见 `GVPConvLayer`。
 
-    :param in_dims: input node embedding dimensions (n_scalar, n_vector)
-    :param out_dims: output node embedding dimensions (n_scalar, n_vector)
-    :param edge_dims: input edge embedding dimensions (n_scalar, n_vector)
-    :param n_layers: number of GVPs in the message function
-    :param module_list: preconstructed message function, overrides n_layers
-    :param aggr: should be "add" if some incoming edges are masked, as in
-                 a masked autoregressive decoder architecture, otherwise "mean"
-    :param activations: tuple of functions (scalar_act, vector_act) to use in GVPs
-    :param vector_gate: whether to use vector gating.
-                        (vector_act will be used as sigma^+ in vector gating if `True`)
+    :param in_dims: 输入节点嵌入维度 (n_scalar, n_vector)
+    :param out_dims: 输出节点嵌入维度 (n_scalar, n_vector)
+    :param edge_dims: 输入边嵌入维度 (n_scalar, n_vector)
+    :param n_layers: 消息函数中GVPs的数量
+    :param module_list: 预构建的消息函数，覆盖n_layers
+    :param aggr: 如果一些入边被掩码，如在掩码自回归解码器架构中，应为"add"，否则为"mean"
+    :param activations: 在GVPs中使用的函数元组 (scalar_act, vector_act)
+    :param vector_gate: 是否使用向量门控。
+                        如果为 `True`，vector_act 将用作向量门控中的 sigma^+
     '''
 
     def __init__(self, in_dims, out_dims, edge_dims,
@@ -361,9 +347,9 @@ class GVPConv(MessagePassing):
 
     def forward(self, x, edge_index, edge_attr):
         '''
-        :param x: tuple (s, V) of `torch.Tensor`
-        :param edge_index: array of shape [2, n_edges]
-        :param edge_attr: tuple (s, V) of `torch.Tensor`
+        :param x: `torch.Tensor` 的元组 (s, V)
+        :param edge_index: 形状为 [2, n_edges] 的数组
+        :param edge_attr: `torch.Tensor` 的元组 (s, V)
         '''
         x_s, x_v = x
         message = self.propagate(edge_index,
@@ -381,24 +367,22 @@ class GVPConv(MessagePassing):
 
 class GVPConvLayer(nn.Module):
     '''
-    Full graph convolution / message passing layer with
-    Geometric Vector Perceptrons. Residually updates node embeddings with
-    aggregated incoming messages, applies a pointwise feedforward
-    network to node embeddings, and returns updated node embeddings.
+    带有几何向量感知器的完整图卷积/消息传递层。
+    使用聚合的传入消息残差更新节点嵌入，
+    对节点嵌入应用逐点前馈网络，并返回更新后的节点嵌入。
 
-    To only compute the aggregated messages, see `GVPConv`.
+    要仅计算聚合消息，请参见 `GVPConv`。
 
-    :param node_dims: node embedding dimensions (n_scalar, n_vector)
-    :param edge_dims: input edge embedding dimensions (n_scalar, n_vector)
-    :param n_message: number of GVPs to use in message function
-    :param n_feedforward: number of GVPs to use in feedforward function
-    :param drop_rate: drop probability in all dropout layers
-    :param autoregressive: if `True`, this `GVPConvLayer` will be used
-           with a different set of input node embeddings for messages
-           where src >= dst
-    :param activations: tuple of functions (scalar_act, vector_act) to use in GVPs
-    :param vector_gate: whether to use vector gating.
-                        (vector_act will be used as sigma^+ in vector gating if `True`)
+    :param node_dims: 节点嵌入维度 (n_scalar, n_vector)
+    :param edge_dims: 输入边嵌入维度 (n_scalar, n_vector)
+    :param n_message: 消息函数中使用的GVPs数量
+    :param n_feedforward: 前馈函数中使用的GVPs数量
+    :param drop_rate: 所有dropout层中的丢弃概率
+    :param autoregressive: 如果为 `True`，此 `GVPConvLayer` 将用于
+           消息的不同输入节点嵌入集，其中 src >= dst
+    :param activations: 在GVPs中使用的函数元组 (scalar_act, vector_act)
+    :param vector_gate: 是否使用向量门控。
+                        如果为 `True`，vector_act 将用作向量门控中的 sigma^+
     '''
 
     def __init__(self, node_dims, edge_dims,
@@ -429,17 +413,14 @@ class GVPConvLayer(nn.Module):
     def forward(self, x, edge_index, edge_attr,
                 autoregressive_x=None, node_mask=None):
         '''
-        :param x: tuple (s, V) of `torch.Tensor`
-        :param edge_index: array of shape [2, n_edges]
-        :param edge_attr: tuple (s, V) of `torch.Tensor`
-        :param autoregressive_x: tuple (s, V) of `torch.Tensor`.
-                If not `None`, will be used as src node embeddings
-                for forming messages where src >= dst. The corrent node
-                embeddings `x` will still be the base of the update and the
-                pointwise feedforward.
-        :param node_mask: array of type `bool` to index into the first
-                dim of node embeddings (s, V). If not `None`, only
-                these nodes will be updated.
+        :param x: `torch.Tensor` 的元组 (s, V)
+        :param edge_index: 形状为 [2, n_edges] 的数组
+        :param edge_attr: `torch.Tensor` 的元组 (s, V)
+        :param autoregressive_x: `torch.Tensor` 的元组 (s, V)。
+                如果不为 `None`，将用作形成消息的源节点嵌入，其中 src >= dst。
+                当前节点嵌入 `x` 仍将是更新和逐点前馈的基础。
+        :param node_mask: 类型为 `bool` 的数组，用于索引到节点嵌入 (s, V) 的第一维。
+                如果不为 `None`，只有这些节点会被更新。
         '''
 
         if autoregressive_x is not None:

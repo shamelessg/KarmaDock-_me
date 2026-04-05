@@ -18,7 +18,7 @@ sys.path.append(os.path.dirname(pwd_dir))
 
 def prepare_pro(pdb_id):
     '''
-    prepare protein structure using schrodinger
+    使用schrodinger准备蛋白质结构
     :param pdb_id:
     :return:
     '''
@@ -55,8 +55,8 @@ def get_mol2_xyz_from_cmd(ligand_mol2):
 
 def get_pocket(pdb_id):
     '''
-    get binding pocket based on reference crystal ligand
-    and move random generate liand pose to the center of pocket
+    基于参考晶体配体获取结合口袋
+    并将随机生成的配体姿态移动到口袋中心
     :param pdb_id:
     :return:
     '''

@@ -30,7 +30,7 @@ RES_MAX_NATOMS=24
 
 def _normalize(tensor, dim=-1):
     '''
-    Normalizes a `torch.Tensor` along dimension `dim` without `nan`s.
+    沿维度 `dim` 归一化 `torch.Tensor`，不含 `nan`。
     '''
     return torch.nan_to_num(
         torch.div(tensor, torch.norm(tensor, dim=dim, keepdim=True)))
@@ -38,11 +38,11 @@ def _normalize(tensor, dim=-1):
 
 def _rbf(D, D_min=0., D_max=20., D_count=16, device='cpu'):
     '''
-    From https://github.com/jingraham/neurips19-graph-protein-design
+    来自 https://github.com/jingraham/neurips19-graph-protein-design
 
-    Returns an RBF embedding of `torch.Tensor` `D` along a new axis=-1.
-    That is, if `D` has shape [...dims], then the returned tensor will have
-    shape [...dims, D_count].
+    沿新的轴=-1返回 `torch.Tensor` `D` 的RBF嵌入。
+    即，如果 `D` 的形状为 [...dims]，则返回的张量将具有
+    形状 [...dims, D_count]。
     '''
     D_mu = torch.linspace(D_min, D_max, D_count, device=device)
     D_mu = D_mu.view([1, -1])

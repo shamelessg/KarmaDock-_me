@@ -7,10 +7,10 @@
 @Version :   1.0
 @Contact :   
 @License :   
-@Desc    :   None
+@Desc    :   无
 '''
 
-# here put the import lib
+# 这里放置导入库
 
 import argparse
 import os

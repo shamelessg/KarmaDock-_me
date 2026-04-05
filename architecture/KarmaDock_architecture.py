@@ -1,7 +1,7 @@
 #!usr/bin/env python3
 # -*- coding:utf-8 -*-
-# @time : 2022/8/8 16:51
-# @author : Xujun Zhang
+# @时间 : 2022/8/8 16:51
+# @作者 : Xujun Zhang
 
 import random
 import numpy as np
@@ -20,7 +20,7 @@ from torch_geometric.nn import GraphNorm
 class KarmaDock(nn.Module):
     def __init__(self):
         super(KarmaDock, self).__init__()
-        # encoders
+        # 编码器
         self.lig_encoder = GraghTransformer(
             in_channels=89, 
             edge_features=20, 
@@ -35,7 +35,7 @@ class KarmaDock(nn.Module):
         self.pro_encoder = GVP_embedding(
             (9, 3), (128, 16), (102, 1), (32, 1), seq_in=True) 
         self.gn = GraphNorm(128)
-        # pose prediction
+        # 姿态预测
         self.egnn_layers = nn.ModuleList( 
             [EGNN(dim_in=128, dim_tmp=128, edge_in=128, edge_out=128, num_head=4, drop_rate=0.15) for i in range(8)]
         )
@@ -46,7 +46,7 @@ class KarmaDock(nn.Module):
         self.edge_gate_layer = Gate_Block(dim_tmp=128, 
                                           drop_rate=0.15
                                           )
-        # scoring 
+        # 打分 
         self.mdn_layer = MDN_Block(hidden_dim=128, 
                                          n_gaussians=10, 
                                         dropout_rate=0.10, 
@@ -80,11 +80,11 @@ class KarmaDock(nn.Module):
                                                        data[("protein", "p2p", "protein")]["edge_v"]),
                                                       data['protein'].seq)
         lig_node_s = self.lig_encoder(data['ligand'].node_s.to(torch.float32), data['ligand', 'l2l', 'ligand'].edge_s[data['ligand'].cov_edge_mask].to(torch.float32), data['ligand', 'l2l', 'ligand'].edge_index[:,data['ligand'].cov_edge_mask])
-        # graph norm through a interaction graph
+        # 通过交互图进行图归一化
         pro_nodes = data['protein'].num_nodes
         node_s = self.gn(torch.cat([pro_node_s, lig_node_s], dim=0), torch.cat([data['protein'].batch, data['ligand'].batch], dim=-1))
         data['protein'].node_s, data['ligand'].node_s = node_s[:pro_nodes], node_s[pro_nodes:]
-        # build interaction graph
+        # 构建交互图
         pro_nodes = data['protein'].num_nodes
         batch = torch.cat([data['protein'].batch, data['ligand'].batch], dim=-1)
         u = torch.cat([
@@ -106,13 +106,13 @@ class KarmaDock(nn.Module):
         if pos_r:
             edge_s = self.edge_init_layer(edge_s)
             rmsd_losss = torch.tensor([], device=device)
-            # 3 recycle 
+            # 3次循环
             for re_idx in range(recycle_num):
-                # 8 egnn layer
+                # 8层EGNN
                 for layer in self.egnn_layers:
                     node_s, edge_s, edge_index, pos = layer(node_s, edge_s, edge_index, pos, pro_nodes, batch, update_pos=True)
                     rmsd_losss = torch.cat([rmsd_losss, self.cal_rmsd(pos_ture=data['ligand'].xyz, pos_pred=pos[pro_nodes:], batch=data['ligand'].batch, if_r=True).view((-1, 1))], dim=1)
-                # res-connection during each recycling
+                # 每次循环中的残差连接
                 node_s = self.node_gate_layer(torch.cat([data['protein'].node_s, data['ligand'].node_s], dim=0), node_s)
                 edge_s = self.edge_gate_layer(
                             self.edge_init_layer(torch.cat([
@@ -146,9 +146,9 @@ class KarmaDock(nn.Module):
     
     def encoding(self, data):
         '''
-        get ligand & protein embeddings
+        获取配体和蛋白质的嵌入
         '''
-        # get embedding
+        # 获取嵌入
         pro_node_s = self.pro_encoder((data['protein']['node_s'], data['protein']['node_v']),
                                                       data[(
                                                           "protein", "p2p", "protein")]["edge_index"],
@@ -160,7 +160,7 @@ class KarmaDock(nn.Module):
     
     def scoring(self, lig_s, lig_pos, pro_s, data, dist_threhold, batch_size):
         '''
-        scoring the protein-ligand binding strength
+        评估蛋白质-配体结合强度
         '''
         pi, sigma, mu, dist, c_batch, _, _ = self.mdn_layer(lig_s=lig_s, lig_pos=lig_pos, lig_batch=data['ligand'].batch,
                                                                pro_s=pro_s, pro_pos=data['protein'].xyz_full, pro_batch=data['protein'].batch,
@@ -172,13 +172,13 @@ class KarmaDock(nn.Module):
     
     def docking(self, pro_node_s, lig_node_s, data, recycle_num=3):
         '''
-        generate protein-ligand binding conformations 
+        生成蛋白质-配体结合构象
         '''
-        # graph norm through interaction graph
+        # 通过交互图进行图归一化
         pro_nodes = data['protein'].num_nodes
         node_s = self.gn(torch.cat([pro_node_s, lig_node_s], dim=0), torch.cat([data['protein'].batch, data['ligand'].batch], dim=-1))
         data['protein'].node_s, data['ligand'].node_s = node_s[:pro_nodes], node_s[pro_nodes:]
-        # build interaction graph
+        # 构建交互图
         pro_nodes = data['protein'].num_nodes
         batch = torch.cat([data['protein'].batch, data['ligand'].batch], dim=-1)
         u = torch.cat([data[("protein", "p2p", "protein")]["edge_index"][0], data[('ligand', 'l2l', 'ligand')]["edge_index"][0]+pro_nodes, data[('protein', 'p2l', 'ligand')]["edge_index"][0], data[('protein', 'p2l', 'ligand')]["edge_index"][1]+pro_nodes], dim=-1)
@@ -207,18 +207,18 @@ class KarmaDock(nn.Module):
     
     def ligand_docking(self, data, docking=False, scoring=False, recycle_num=3, dist_threhold=5):
         '''
-        generating protein-ligand binding conformations and  predicting their binding strength
+        生成蛋白质-配体结合构象并预测其结合强度
         '''
         device = data['protein'].node_s.device
         batch_size = data['protein'].batch.max()+1
-        # encoder
+        # 编码器
         pro_node_s, lig_node_s = self.encoding(data)
-        # docking
+        # 对接
         if docking:
             lig_pos, _, _ = self.docking(pro_node_s, lig_node_s, data, recycle_num)
         else:
             lig_pos = data['ligand'].xyz
-        # scoring
+        # 打分
         if scoring:
             mdn_score = self.scoring(lig_s=lig_node_s, lig_pos=lig_pos, pro_s=pro_node_s, data=data,
                                                                dist_threhold=dist_threhold, batch_size=batch_size)

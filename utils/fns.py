@@ -38,7 +38,7 @@ def load_graph(src_file):
 
 def karmadock_evaluation(model, dataset_loader, device, pos_r):
     '''
-    used for evaluate model
+    用于评估模型
     :param model:
     :param dataset_loader:
     :param device:
@@ -118,11 +118,11 @@ class Early_stopper(object):
         return prev_best_score / score > 1 + self.tolerance
 
     def load_model(self, model_obj, my_device, strict=False):
-        '''Load model saved with early stopping.'''
+        '''加载通过早停保存的模型。'''
         model_obj.load_state_dict(torch.load(self.model_file, map_location=my_device)['model_state_dict'], strict=strict)
 
     def save_model(self, model_obj):
-        '''Saves model when the metric on the validation set gets improved.'''
+        '''当验证集上的指标得到改善时保存模型。'''
         torch.save({'model_state_dict': model_obj.state_dict()}, self.model_file)
 
     def step(self, score, model_obj):

@@ -7,10 +7,10 @@
 @Version :   1.0
 @Contact :   
 @License :   
-@Desc    :   None
+@Desc    :   无
 '''
 
-# here put the import lib
+# 这里放置导入库
 import torch
 from collections.abc import Mapping, Sequence
 from typing import List, Optional, Union, List
@@ -54,23 +54,20 @@ class PassNoneCollater:
 
 
 class PassNoneDataLoader(torch.utils.data.DataLoader):
-    r"""A data loader which merges data objects from a
-    :class:`torch_geometric.data.Dataset` to a mini-batch.
-    Data objects can be either of type :class:`~torch_geometric.data.Data` or
-    :class:`~torch_geometric.data.HeteroData`.
+    r"""一个数据加载器，用于将 :class:`torch_geometric.data.Dataset` 中的数据对象合并为小批量。
+    数据对象可以是 :class:`~torch_geometric.data.Data` 或 :class:`~torch_geometric.data.HeteroData` 类型。
 
-    Args:
-        dataset (Dataset): The dataset from which to load the data.
-        batch_size (int, optional): How many samples per batch to load.
-            (default: :obj:`1`)
-        shuffle (bool, optional): If set to :obj:`True`, the data will be
-            reshuffled at every epoch. (default: :obj:`False`)
-        follow_batch (List[str], optional): Creates assignment batch
-            vectors for each key in the list. (default: :obj:`None`)
-        exclude_keys (List[str], optional): Will exclude each key in the
-            list. (default: :obj:`None`)
-        **kwargs (optional): Additional arguments of
-            :class:`torch.utils.data.DataLoader`.
+    参数:
+        dataset (Dataset): 从中加载数据的数据集。
+        batch_size (int, optional): 每个批次加载多少样本。
+            (默认值: :obj:`1`)
+        shuffle (bool, optional): 如果设置为 :obj:`True`，数据将在每个 epoch 重新洗牌。
+            (默认值: :obj:`False`)
+        follow_batch (List[str], optional): 为列表中的每个键创建分配批次向量。
+            (默认值: :obj:`None`)
+        exclude_keys (List[str], optional): 将排除列表中的每个键。
+            (默认值: :obj:`None`)
+        **kwargs (optional): :class:`torch.utils.data.DataLoader` 的其他参数。
     """
     def __init__(
         self,
